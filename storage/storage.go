@@ -22,17 +22,17 @@ type Storer interface {
 	GetToken() string
 }
 
-func NewStorer() Storer {
+func NewStorer() (Storer, error) {
 	godotenv.Load(".env")
 	// Set up a client to the DigitalOcean Space
 	client, err := minio.New(os.Getenv("SPACE_URL"), os.Getenv("SPACE_ACCESS_KEY"), os.Getenv("SPACE_SECRET"), true)
 	if err != nil {
 		logger.Errorf("could not start client: %v", err)
-		return nil
+		return nil, err
 	}
 	return &storer{
 		client: client,
-	}
+	}, nil
 }
 
 type storer struct {
