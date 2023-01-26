@@ -1,0 +1,27 @@
+parameters: {}
+environment: {}
+packages:
+    - name: book
+      shared: false
+      environment: {}
+      parameters: {}
+      annotations: {}
+      functions:
+        - name: getEntries
+          binary: false
+          main: ""
+          runtime: go:default
+          web: true
+          parameters: {}
+          environment: {}
+          annotations: {}
+          limits: {}
+        - name: addEntry
+          binary: false
+          main: ""
+          runtime: go:default
+          web: true
+          parameters: { }
+          environment: { }
+          annotations: { }
+          limits: { }
