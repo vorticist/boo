@@ -7,7 +7,6 @@ import (
 	"github.com/minio/minio-go"
 	"gitlab.com/vorticist/logger"
 	"io"
-	"log"
 	"os"
 )
 
@@ -28,7 +27,8 @@ func NewStorer() Storer {
 	// Set up a client to the DigitalOcean Space
 	client, err := minio.New(os.Getenv("SPACE_URL"), os.Getenv("SPACE_ACCESS_KEY"), os.Getenv("SPACE_SECRET"), true)
 	if err != nil {
-		log.Fatalln(err)
+		logger.Errorf("could not start client: %v", err)
+		return nil
 	}
 	return &storer{
 		client: client,
