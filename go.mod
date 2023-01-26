@@ -3,9 +3,9 @@ module github.com/vorticist/boo
 go 1.17
 
 require (
+	github.com/aws/aws-sdk-go v1.44.187
 	github.com/getlantern/systray v1.2.1
 	github.com/joho/godotenv v1.4.0
-	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/spf13/cobra v1.6.1
 	gitlab.com/vorticist/logger v0.0.0-20200604030304-8a8d6d4d3bb3
 )
@@ -15,18 +15,14 @@ require (
 	gioui.org/shader v1.0.6 // indirect
 	github.com/benoitkugler/textlayout v0.1.3 // indirect
 	github.com/gioui/uax v0.2.1-0.20220819135011-cda973fac06d // indirect
-	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20220827204233-334a2380cb91 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
-	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 )
 

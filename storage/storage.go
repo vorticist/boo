@@ -3,8 +3,12 @@ package storage
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/joho/godotenv"
-	"github.com/minio/minio-go"
 	"gitlab.com/vorticist/logger"
 	"io"
 	"os"
@@ -12,7 +16,11 @@ import (
 
 const (
 	bucketName = "vortex"
-	objName    = "book-of-omens"
+	storeName  = "book-of-omens"
+)
+
+var (
+	storeUrl string
 )
 
 type Storer interface {
@@ -24,19 +32,27 @@ type Storer interface {
 
 func NewStorer() (Storer, error) {
 	godotenv.Load(".env")
-	// Set up a client to the DigitalOcean Space
-	client, err := minio.New(os.Getenv("SPACE_URL"), os.Getenv("SPACE_ACCESS_KEY"), os.Getenv("SPACE_SECRET"), true)
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(os.Getenv("SPACE_ACCESS_KEY"), os.Getenv("SPACE_SECRET"), ""),
+		Endpoint:         aws.String(fmt.Sprintf("https://%v", os.Getenv("SPACE_URL"))),
+		Region:           aws.String("fra1"),
+		S3ForcePathStyle: aws.Bool(false),
+	}
+
+	newSession, err := session.NewSession(s3Config)
 	if err != nil {
-		logger.Errorf("could not start client: %v", err)
+		logger.Errorf("failed create session: %v", err)
 		return nil, err
 	}
+	s3Client := s3.New(newSession)
+
 	return &storer{
-		client: client,
+		client: s3Client,
 	}, nil
 }
 
 type storer struct {
-	client *minio.Client
+	client *s3.S3
 }
 
 func (s *storer) AddEntry(key, value string) {
@@ -63,15 +79,21 @@ func (s *storer) GetEntries() map[string]string {
 }
 
 func (s *storer) readStoreData() []byte {
-	// Read the file contents
-	obj, err := s.client.GetObject(bucketName, objName, minio.GetObjectOptions{})
-	if err != nil {
-		logger.Errorf("error getting object from space: %v", err)
-		return nil
+
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(storeName),
 	}
-	data, err := io.ReadAll(obj)
+
+	result, err := s.client.GetObject(input)
 	if err != nil {
-		logger.Errorf("error reading file from space: %v", err)
+		logger.Errorf("failed to download object: %v", err)
+		fmt.Println(err.Error())
+	}
+
+	data, err := io.ReadAll(result.Body)
+	if err != nil {
+		logger.Errorf("failed to read data: %v", err)
 		return nil
 	}
 
@@ -79,19 +101,20 @@ func (s *storer) readStoreData() []byte {
 }
 
 func (s *storer) GetToken() string {
-	obj, err := s.client.GetObject(bucketName, "book-token", minio.GetObjectOptions{})
-	if err != nil {
-		logger.Errorf("error getting object from space: %v", err)
-		return ""
-	}
-
-	data, err := io.ReadAll(obj)
-	if err != nil {
-		logger.Errorf("error reading file from space: %v", err)
-		return ""
-	}
-
-	return string(data)
+	//obj, err := s.client.GetObject(context.Background(), bucketName, "book-token", minio.GetObjectOptions{})
+	//if err != nil {
+	//	logger.Errorf("error getting object from space: %v", err)
+	//	return ""
+	//}
+	//
+	//data, err := io.ReadAll(obj)
+	//if err != nil {
+	//	logger.Errorf("error reading file from space: %v", err)
+	//	return ""
+	//}
+	//
+	//return string(data)
+	return ""
 }
 
 func (s *storer) saveStoreMap(m map[string]string) error {
@@ -99,28 +122,45 @@ func (s *storer) saveStoreMap(m map[string]string) error {
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(m)
 	if err != nil {
-		logger.Errorf("error encoding map:", err)
+		logger.Errorf("error encoding map: %v", err)
 		return err
 	}
 
 	newData := b.Bytes()
-	_, err = s.client.PutObject(bucketName, "filename", bytes.NewReader(newData), int64(len(newData)), minio.PutObjectOptions{ContentType: "application/octet-stream"})
+
+	object := s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(storeName),
+		Body:   bytes.NewReader(newData),
+		ACL:    aws.String("private"),
+		Metadata: map[string]*string{
+			"x-amz-meta-my-key": aws.String(os.Getenv("SPACE_ACCESS_KEY")),
+		},
+	}
+
+	_, err = s.client.PutObject(&object)
 	if err != nil {
-		logger.Errorf("error saving file to space:", err)
+		logger.Errorf("error putting object: %v", err)
 		return err
 	}
+
 	logger.Info("file modified successfully")
 	return nil
 }
 
 func (s *storer) getStoreMap() map[string]string {
 	data := s.readStoreData()
+	logger.Infof("got data: %v", string(data))
 	var decodedMap map[string]string
 
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	err := dec.Decode(&decodedMap)
 	if err != nil {
-		logger.Errorf("error decoding byte slice:", err)
+		if err == io.EOF {
+			logger.Warn("sotre empty, initializing...")
+			return map[string]string{}
+		}
+		logger.Errorf("failed to decode data: %v", err)
 		return nil
 	}
 
