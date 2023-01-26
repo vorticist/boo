@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-    "gitlab.com/vorticist/book/ui"
-    "os"
+	"github.com/vorticist/boo/ui"
+	"os"
 
 	"github.com/getlantern/systray"
 )
@@ -31,7 +31,7 @@ func onReady() {
 			select {
 			case <-openApp.ClickedCh:
 				fmt.Println("Open App")
-				 go ui.StartApp()
+				go ui.StartApp()
 			case <-quit.ClickedCh:
 				fmt.Println("Quit")
 				exit <- true

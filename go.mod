@@ -1,4 +1,4 @@
-module gitlab.com/vorticist/book
+module github.com/vorticist/boo
 
 go 1.19
 

@@ -10,7 +10,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"gitlab.com/vorticist/book/ui/assets"
+	"github.com/vorticist/boo/ui/assets"
 	"gitlab.com/vorticist/logger"
 )
 
@@ -69,7 +69,7 @@ func layoutLabel(th *material.Theme, text string) layout.Widget {
 func layoutTextField(th *material.Theme, textEditor *widget.Editor, hint string) layout.Widget {
 	return func(gtx layout.Context) layout.Dimensions {
 		e := material.Editor(th, textEditor, hint)
-        cornerRadius := 5
+		cornerRadius := 5
 		border := widget.Border{Color: color.NRGBA{A: 0xff}, CornerRadius: unit.Dp(cornerRadius), Width: unit.Dp(1)}
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.UniformInset(unit.Dp(8)).Layout(gtx, e.Layout)
