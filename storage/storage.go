@@ -26,7 +26,7 @@ type Storer interface {
 func NewStorer() Storer {
 	godotenv.Load(".env")
 	// Set up a client to the DigitalOcean Space
-	client, err := minio.New(os.Getenv(""), "DO00ZR6CEE7LY3HBCF2B", "dIQvV1QzmW2BjcHRD/GC8ELuFK2rJHCcCbJs0C12omA", true)
+	client, err := minio.New(os.Getenv("SPACE_URL"), os.Getenv("SPACE_ACCESS_KEY"), os.Getenv("SPACE_SECRET"), true)
 	if err != nil {
 		log.Fatalln(err)
 	}
