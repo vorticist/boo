@@ -24,7 +24,7 @@ var (
 )
 
 type Storer interface {
-	AddEntry(key, value string)
+	SaveEntry(key, value string)
 	RemoveEntry(key string)
 	GetEntries() map[string]string
 	GetToken() string
@@ -55,7 +55,7 @@ type storer struct {
 	client *s3.S3
 }
 
-func (s *storer) AddEntry(key, value string) {
+func (s *storer) SaveEntry(key, value string) {
 	storeMap := s.getStoreMap()
 	storeMap[key] = value
 	err := s.saveStoreMap(storeMap)

@@ -27,7 +27,7 @@ func TestStorer_GetEntries(t *testing.T) {
 	logger.Infof("entries: %v", entries)
 }
 
-func TestStorer_AddEntry(t *testing.T) {
+func TestStorer_SaveEntry(t *testing.T) {
 	storer, err := NewStorer()
 	if err != nil {
 		t.Errorf("TestStorer_GetEntries -> NewStorer failed: %v", err)
@@ -35,7 +35,7 @@ func TestStorer_AddEntry(t *testing.T) {
 	}
 	entries := storer.GetEntries()
 
-	storer.AddEntry("NEW_KEY", "NEW_VALUE")
+	storer.SaveEntry("NEW_KEY", "NEW_VALUE")
 
 	entries = storer.GetEntries()
 
