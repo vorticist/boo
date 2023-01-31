@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/aws/aws-sdk-go v1.44.187
 	github.com/getlantern/systray v1.2.1
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/joho/godotenv v1.4.0
 	github.com/spf13/cobra v1.6.1
 	gitlab.com/vorticist/logger v0.0.0-20200604030304-8a8d6d4d3bb3
@@ -23,6 +24,7 @@ require (
 	github.com/stretchr/testify v1.8.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20220827204233-334a2380cb91 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 )
 

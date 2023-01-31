@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/vorticist/boo/client"
+	"github.com/vorticist/boo/subs"
 	"github.com/vorticist/boo/ui"
+	"gitlab.com/vorticist/logger"
 	"os"
 
 	"github.com/getlantern/systray"
@@ -14,6 +17,9 @@ var (
 
 func main() {
 	exit = make(chan bool)
+	subs.NewEventListener()
+	booClient := client.New()
+	subscriptions(booClient)
 	go systray.Run(onReady, onExit)
 	<-exit
 }
@@ -30,10 +36,10 @@ func onReady() {
 		for {
 			select {
 			case <-openApp.ClickedCh:
-				fmt.Println("Open App")
+				logger.Info("Open App")
 				go ui.StartApp()
 			case <-quit.ClickedCh:
-				fmt.Println("Quit")
+				logger.Info("Quit")
 				exit <- true
 				systray.Quit()
 			}

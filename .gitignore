@@ -1,4 +1,4 @@
 .idea
 .fleet
 
-storage/.env
+.env

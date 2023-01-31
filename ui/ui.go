@@ -1,6 +1,8 @@
 package ui
 
 import (
+	pages2 "github.com/vorticist/boo/ui/pages"
+	"github.com/vorticist/boo/ui/pages/home"
 	"image/color"
 
 	"gioui.org/app"
@@ -12,6 +14,11 @@ import (
 	"gioui.org/widget/material"
 	"github.com/vorticist/boo/ui/assets"
 	"gitlab.com/vorticist/logger"
+)
+
+var (
+	pages     []pages2.Page
+	pageIndex int = 0
 )
 
 func StartApp() {
@@ -39,13 +46,21 @@ func draw(w *app.Window) error {
 		ContrastBg: color.NRGBA{R: 0xd5, G: 0x00, B: 0x37, A: 0xFF},
 		ContrastFg: color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF},
 	}
+	pages = append(pages, home.Page(th))
 	for {
 		select {
 		case e := <-w.Events():
 			switch e := e.(type) {
+			case system.StageEvent:
+				if e.Stage >= system.StageRunning {
+					page := pages[pageIndex]
+					page.Start()
+				}
 			case system.FrameEvent:
 				gtx := layout.NewContext(&ops, e)
-				mainScreen(gtx, th)
+				page := pages[pageIndex]
+				page.Layout(gtx)
+				//mainScreen(gtx, th)
 				e.Frame(gtx.Ops)
 			case system.DestroyEvent:
 				logger.Infof("destroy: %v", e)
