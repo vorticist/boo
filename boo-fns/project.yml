@@ -16,7 +16,16 @@ packages:
           environment: {}
           annotations: {}
           limits: {}
-        - name: addEntry
+        - name: saveEntry
+          binary: false
+          main: ""
+          runtime: go:default
+          web: true
+          parameters: { }
+          environment: { }
+          annotations: { }
+          limits: { }
+        - name: removeEntry
           binary: false
           main: ""
           runtime: go:default

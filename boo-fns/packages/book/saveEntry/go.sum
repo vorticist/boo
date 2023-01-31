@@ -21,8 +21,8 @@ github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
-github.com/vorticist/boo v0.0.0-20230126215704-fff9d6ebddf0 h1:VOyNReWg0N/OYfsMCJUW8P7sENu+5f1DTlbyx5AYkNw=
-github.com/vorticist/boo v0.0.0-20230126215704-fff9d6ebddf0/go.mod h1:2yhCliTsEat9rEfGyJiXpzswvlk4rOlkgASTXq8DiPo=
+github.com/vorticist/boo v0.0.0-20230131060012-df0717a74223 h1:CPgoMplvast7FkP7/HOy0hyJYW/Kqo24Zj3V2RZB+Wo=
+github.com/vorticist/boo v0.0.0-20230131060012-df0717a74223/go.mod h1:2yhCliTsEat9rEfGyJiXpzswvlk4rOlkgASTXq8DiPo=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/vorticist/logger v0.0.0-20200604030304-8a8d6d4d3bb3 h1:rYKzUj0pqkwZv6TOtcMtswU4666dM7wgYIS0sIJIYok=
 gitlab.com/vorticist/logger v0.0.0-20200604030304-8a8d6d4d3bb3/go.mod h1:x2pGYVhbWxw79ZHlEIOYwDYCgtDyE9/csAVuHYNEQG8=

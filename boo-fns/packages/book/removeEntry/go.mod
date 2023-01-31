@@ -1,8 +1,8 @@
-module github.com/vorticist/boo-fns/packages/book/addEnry
+module github.com/vorticist/boo-fns/packages/book/removeEntry
 
 go 1.19
 
-require github.com/vorticist/boo v0.0.0-20230126215704-fff9d6ebddf0
+require github.com/vorticist/boo v0.0.0-20230126235124-f07c69338341
 
 require (
 	github.com/aws/aws-sdk-go v1.44.187 // indirect
