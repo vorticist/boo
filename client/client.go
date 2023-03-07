@@ -23,8 +23,8 @@ type Client interface {
 
 func New() Client {
 	godotenv.Load(".env")
-	authHeader := fmt.Sprintf("Basic %v", os.Getenv("API_KEY"))
-	logger.Infof("API_KEY = %v", authHeader)
+	authHeader := fmt.Sprintf("Basic %v", os.Getenv("FNS_API_KEY"))
+	logger.Infof("FNS_API_KEY = %v", authHeader)
 	return &client{
 		authHeader: authHeader,
 	}

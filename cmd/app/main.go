@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	exit chan bool
+	exit    chan bool
+	appOpen = false
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 func onReady() {
 	go func() {
-		systray.SetIcon(getIcon("assets/auto_stories_black_24dp.svg"))
+		systray.SetIcon(getIcon("/home/vorticist/boo/assets/auto_stories_black_24dp.svg"))
 		systray.SetTitle("Book of Omens")
 		systray.SetTooltip("Book of Omens")
 		openApp := systray.AddMenuItem("Open App", "Open App")
@@ -44,6 +45,10 @@ func onReady() {
 			select {
 			case <-openApp.ClickedCh:
 				logger.Info("Open App")
+				if !appOpen {
+					// TODO: need a way to detect when the app window is closed and update this value again
+					appOpen = true
+				}
 				go ui.StartApp()
 			case <-quit.ClickedCh:
 				logger.Info("Quit")

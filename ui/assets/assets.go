@@ -21,7 +21,7 @@ func Load() {
 }
 
 func loadFonts() {
-	fontPath := "assets/fonts/"
+	fontPath := "/home/vorticist/boo/assets/fonts/"
 	files := []string{}
 	err := filepath.Walk(fontPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
