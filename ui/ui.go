@@ -28,7 +28,7 @@ func StartApp() {
 	go func() {
 		w := app.NewWindow(
 			app.Title("Book of Omens"),
-			app.Size(unit.Dp(350), unit.Dp(350)),
+			app.Size(unit.Dp(550), unit.Dp(350)),
 		)
 
 		if err := draw(w); err != nil {

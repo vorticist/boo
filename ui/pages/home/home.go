@@ -1,6 +1,7 @@
 package home
 
 import (
+	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -121,9 +122,12 @@ func (m *homePage) itemLayout(gtx layout.Context, i int) layout.Dimensions {
 					for m.addBtn.Clicked() {
 						logger.Info("adding")
 						entries = append(entries, models.Entry{
-							Key:     "New Key",
-							Value:   "New Password",
-							Editing: true,
+							Key:       "New Key",
+							Value:     "New Password",
+							Editing:   true,
+							ShowBtn:   new(widget.Clickable),
+							DeleteBtn: new(widget.Clickable),
+							CopyBtn:   new(widget.Clickable),
 						})
 					}
 					return material.Clickable(gtx, m.addBtn, func(gtx layout.Context) layout.Dimensions {
@@ -139,22 +143,24 @@ func (m *homePage) itemLayout(gtx layout.Context, i int) layout.Dimensions {
 	}
 	i -= 1
 	c := crypt.Get()
+	for entries[i].ShowBtn.Clicked() {
+		entries[i].ShowPassword = !entries[i].ShowPassword
+	}
 	entry := entries[i]
 	// click := &p.clicks[i]
-	logger.Infof("entry[%v]: [%v]", i, entry)
 	dims := in.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		if entry.Editing {
 			for m.saveBtn.Clicked() {
-				encodedPass, err := c.Encrypt(m.passEditor.Text())
+				encrypted, err := c.Encrypt(m.passEditor.Text())
 				if err != nil {
 					logger.Errorf("failed to encode pass: %v", err)
 					continue
 				}
-				logger.Infof("encoded pass: %v", encodedPass)
+				logger.Infof("encoded pass: %v", encrypted)
 				subs.EventChannel <- subs.Event{
 					Type: subs.SaveNewEntry,
 					Data: map[string]interface{}{
-						"entry": models.Entry{Key: m.keyEditor.Text(), Value: encodedPass},
+						"entry": models.Entry{Key: m.keyEditor.Text(), Value: encrypted},
 					},
 				}
 			}
@@ -166,14 +172,41 @@ func (m *homePage) itemLayout(gtx layout.Context, i int) layout.Dimensions {
 			)
 		}
 
-		decoded, err := c.Decrypt(entry.Value)
-		if err != nil {
-			logger.Errorf("failed to decrypt password: %v", err)
-			decoded = ""
+		pass := "******"
+		showLabel := "Show"
+		if entry.ShowPassword {
+			decrypted, err := c.Decrypt(entry.Value)
+			if err != nil {
+				logger.Errorf("failed to decrypt password: %v", err)
+				decrypted = "******"
+			}
+			pass = decrypted
+			showLabel = "Hide"
+		}
+		for entry.DeleteBtn.Clicked() {
+			subs.EventChannel <- subs.Event{
+				Type: subs.RemoveEntry,
+				Data: map[string]interface{}{
+					"entry": models.Entry{Key: entry.Key},
+				},
+			}
+		}
+		for entry.CopyBtn.Clicked() {
+			decrypted, err := c.Decrypt(entry.Value)
+			if err != nil {
+				logger.Errorf("failed to decrypt password: %v", err)
+				decrypted = "******"
+			}
+
+			logger.Infof("copying value from entry: %v", entry)
+			clipboard.WriteOp{Text: decrypted}.Add(gtx.Ops)
 		}
 		return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
-			layout.Flexed(1, material.Caption(m.Theme, entry.Key).Layout),
-			layout.Flexed(1, material.Caption(m.Theme, decoded).Layout),
+			layout.Flexed(3, material.Caption(m.Theme, entry.Key).Layout),
+			layout.Flexed(3, material.Caption(m.Theme, pass).Layout),
+			layout.Flexed(1, material.Button(m.Theme, entry.ShowBtn, showLabel).Layout),
+			layout.Flexed(1, material.Button(m.Theme, entry.CopyBtn, "Copy").Layout),
+			layout.Flexed(1, material.Button(m.Theme, entry.DeleteBtn, "Delete").Layout),
 		)
 	})
 	// click.Add(gtx.Ops)
