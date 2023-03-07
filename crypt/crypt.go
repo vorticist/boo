@@ -1,57 +1,99 @@
 package crypt
 
 import (
-    "crypto/aes"
-    "crypto/cipher"
-    "fmt"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"gitlab.com/vorticist/logger"
+	"io"
 )
 
-func Encode(plain string) string {
-    key := []byte("examplekey32byteslong")
-    plaintext := []byte(plain)
+var c *crypt
 
-    // Create a new AES cipher block
-    block, err := aes.NewCipher(key)
-    if err != nil {
-        fmt.Println(err)
-        return ""
-    }
-
-    // Get the block size
-    blockSize := block.BlockSize()
-
-    // Create a new initialization vector
-    iv := make([]byte, blockSize)
-
-    // Encrypt the plaintext
-    ciphertext := make([]byte, len(plaintext))
-    stream := cipher.NewCFBEncrypter(block, iv)
-    stream.XORKeyStream(ciphertext, plaintext)
-    fmt.Printf("Ciphertext: %x\n", ciphertext)
-
-    return string(ciphertext)
+func New(key string) Crypt {
+	if c == nil {
+		c = &crypt{
+			key: key,
+		}
+	}
+	return c
 }
 
-func Decode(ciphertext string) string {
-    key := []byte("examplekey32byteslong")
+func Get() Crypt {
+	return c
+}
 
-    // Create a new AES cipher block
-    block, err := aes.NewCipher(key)
-    if err != nil {
-        fmt.Println(err)
-        return ""
-    }
+type Crypt interface {
+	Encrypt(string) (string, error)
+	Decrypt(string) (string, error)
+}
 
-    // Get the block size
-    blockSize := block.BlockSize()
+type crypt struct {
+	key string
+}
 
-    // Create a new initialization vector
-    iv := make([]byte, blockSize)
+func (c *crypt) Encrypt(text string) (string, error) {
+	key, err := hex.DecodeString(c.key)
+	if err != nil {
+		logger.Errorf("failed to decode key: %v", err)
+		return "", err
+	}
+	plaintext := []byte(text)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		logger.Errorf("failed to create cipher: %v", err)
+		return "", err
+	}
 
-    decrypted := []byte{}
-    stream := cipher.NewCFBDecrypter(block, iv)
-    stream.XORKeyStream(decrypted, []byte(ciphertext))
-    fmt.Printf("Decrypted: %s\n", decrypted)
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		logger.Errorf("failed to create aesGCM: %v", err)
+		return "", err
+	}
+	nonce := make([]byte, aesGCM.NonceSize())
 
-    return string(decrypted)
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		logger.Errorf("failed to read data: %v", err)
+		return "", err
+	}
+	ciphertext := aesGCM.Seal(nonce, nonce, plaintext, nil)
+	return fmt.Sprintf("%x", ciphertext), nil
+}
+
+func (c *crypt) Decrypt(text string) (string, error) {
+	key, err := hex.DecodeString(c.key)
+	if err != nil {
+		logger.Errorf("failed to decode key: %v", err)
+		return "", err
+	}
+
+	enc, err := hex.DecodeString(text)
+	if err != nil {
+		logger.Errorf("failed to decode encrypted: %v", err)
+		return "", err
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		logger.Errorf("failed to create cipher: %v", err)
+		return "", err
+	}
+
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		logger.Errorf("failed to create aesGCM: %v", err)
+		return "", err
+	}
+	nonceSize := aesGCM.NonceSize()
+	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
+
+	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		logger.Errorf("failed to open cipher: %v", err)
+		return "", err
+	}
+
+	return fmt.Sprintf("%s", plaintext), nil
 }

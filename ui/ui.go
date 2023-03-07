@@ -13,12 +13,14 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/vorticist/boo/ui/assets"
+	pgs "github.com/vorticist/boo/ui/pages"
 	"gitlab.com/vorticist/logger"
 )
 
 var (
 	pages     []pages2.Page
 	pageIndex int = 0
+	env       *pgs.Env
 )
 
 func StartApp() {
@@ -39,6 +41,7 @@ func StartApp() {
 
 func draw(w *app.Window) error {
 	var ops op.Ops
+	env = &pgs.Env{Redraw: w.Invalidate}
 	th := material.NewTheme(assets.Fonts)
 	th.Palette = material.Palette{
 		Fg:         color.NRGBA{R: 0xd5, G: 0x00, B: 0x37, A: 0xFF},
@@ -46,7 +49,7 @@ func draw(w *app.Window) error {
 		ContrastBg: color.NRGBA{R: 0xd5, G: 0x00, B: 0x37, A: 0xFF},
 		ContrastFg: color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF},
 	}
-	pages = append(pages, home.Page(th))
+	pages = append(pages, home.Page(th, env))
 	for {
 		select {
 		case e := <-w.Events():

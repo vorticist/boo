@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/vorticist/boo/client"
+	"github.com/vorticist/boo/crypt"
 	"github.com/vorticist/boo/subs"
 	"github.com/vorticist/boo/ui"
 	"gitlab.com/vorticist/logger"
@@ -19,6 +20,12 @@ func main() {
 	exit = make(chan bool)
 	subs.NewEventListener()
 	booClient := client.New()
+	key, err := booClient.GetCryptKey()
+	if err != nil {
+		logger.Errorf("error getting crypto key: %v", err)
+		return
+	}
+	crypt.New(key)
 	subscriptions(booClient)
 	go systray.Run(onReady, onExit)
 	<-exit

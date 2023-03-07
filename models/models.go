@@ -1,6 +1,7 @@
 package models
 
 type Entry struct {
-	Id    string
-	Value string
+	Key     string
+	Value   string
+	Editing bool
 }

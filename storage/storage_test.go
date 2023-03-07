@@ -56,11 +56,11 @@ func TestStorer_RemoveEntry(t *testing.T) {
 		return
 	}
 
-	storer.RemoveEntry("NEW_KEY")
+	storer.RemoveEntry("hotmail")
 
 	entries := storer.GetEntries()
 
-	if _, ok := entries["NEW_KEY"]; ok {
+	if _, ok := entries["hotmail"]; ok {
 		t.Error("TestStorer_AddEntry -> key not removed")
 		return
 	}

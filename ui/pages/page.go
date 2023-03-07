@@ -11,6 +11,6 @@ type Page interface {
 }
 
 type Env struct {
-	redraw func()
+	Redraw func()
 	Insets layout.Inset
 }

@@ -14,6 +14,8 @@ var (
 )
 
 type Client interface {
+	GetCryptKey() (string, error)
+
 	GetEntries() (map[string]string, error)
 	SaveEntry(key, value string) (map[string]string, error)
 	RemoveEntry(key string) (map[string]string, error)
@@ -30,6 +32,32 @@ func New() Client {
 
 type client struct {
 	authHeader string
+}
+
+func (c *client) GetCryptKey() (string, error) {
+	logger.Info("GetCryptKey")
+	client := resty.New()
+
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Authorization", c.authHeader).
+		EnableTrace().
+		Post(fmt.Sprintf(fnsUrl, "getCryptoKey"))
+	if err != nil {
+		logger.Errorf("failed to get entries: %v", err)
+		return "", err
+	}
+
+	var result map[string]string
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		logger.Errorf("failed to unmarshal response: %v", err)
+		return "", err
+	}
+
+	logger.Infof("GetCryptKey %v", result["key"])
+
+	return result["key"], nil
 }
 
 func (c *client) GetEntries() (map[string]string, error) {

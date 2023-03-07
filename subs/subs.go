@@ -46,4 +46,5 @@ func listen() {
 const (
 	GetEntries      = "get_entries"
 	EntriesReceived = "entries_received"
+	SaveNewEntry    = "save_new_entry"
 )
