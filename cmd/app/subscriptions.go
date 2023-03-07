@@ -6,6 +6,7 @@ import (
 	"github.com/vorticist/boo/models"
 	"github.com/vorticist/boo/subs"
 	"gitlab.com/vorticist/logger"
+	"strings"
 )
 
 func subscriptions(cli client.Client) {
@@ -57,6 +58,33 @@ func subscriptions(cli client.Client) {
 		}
 
 		es := mapEntries(entries)
+
+		subs.EventChannel <- subs.Event{
+			Type: subs.EntriesReceived,
+			Data: map[string]interface{}{
+				"entries": es,
+			},
+		}
+
+		return nil
+	})
+
+	subs.Subscribe(subs.FilterEntries, func(e subs.Event) error {
+		term := e.Data["term"].(string)
+		entries, err := cli.GetEntries()
+		if err != nil {
+			return err
+		}
+
+		var filteredEntries []models.Entry
+		es := mapEntries(entries)
+		for _, en := range es {
+			if strings.Contains(strings.ToLower(en.Key), strings.ToLower(term)) {
+				filteredEntries = append(filteredEntries, en)
+			}
+		}
+
+		es = filteredEntries
 
 		subs.EventChannel <- subs.Event{
 			Type: subs.EntriesReceived,

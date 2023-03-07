@@ -12,6 +12,7 @@ import (
 	"github.com/vorticist/boo/ui/pages"
 	"gitlab.com/vorticist/logger"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+	"time"
 )
 
 var (
@@ -36,6 +37,10 @@ func Page(th *material.Theme, env *pages.Env) pages.Page {
 		addBtn:    new(widget.Clickable),
 		saveBtn:   new(widget.Clickable),
 		cancelBtn: new(widget.Clickable),
+		searchEditor: &widget.Editor{
+			SingleLine: true,
+			Submit:     true,
+		},
 		passEditor: &widget.Editor{
 			SingleLine: true,
 		},
@@ -52,13 +57,17 @@ type homePage struct {
 	Theme *material.Theme
 	env   *pages.Env
 
-	addBtn     *widget.Clickable
-	saveBtn    *widget.Clickable
-	cancelBtn  *widget.Clickable
-	passEditor *widget.Editor
-	keyEditor  *widget.Editor
-	saveIcon   *widget.Icon
-	cancelIcon *widget.Icon
+	addBtn       *widget.Clickable
+	saveBtn      *widget.Clickable
+	cancelBtn    *widget.Clickable
+	passEditor   *widget.Editor
+	keyEditor    *widget.Editor
+	searchEditor *widget.Editor
+	saveIcon     *widget.Icon
+	cancelIcon   *widget.Icon
+
+	last        string
+	lastBackoff time.Time
 }
 
 func (m *homePage) Start() {
@@ -115,8 +124,27 @@ func (m *homePage) itemLayout(gtx layout.Context, i int) layout.Dimensions {
 	}
 
 	if i == 0 {
+		if m.searchEditor.Focused() {
+			curr := time.Now()
+			if m.lastBackoff.IsZero() {
+				m.lastBackoff = curr
+			}
+			term := m.searchEditor.Text()
+			if m.last != term && time.Since(m.lastBackoff) > 500 {
+				logger.Infof("search %v", term)
+				m.lastBackoff = time.Time{}
+				m.last = term
+				subs.EventChannel <- subs.Event{
+					Type: subs.FilterEntries,
+					Data: map[string]interface{}{
+						"term": term,
+					},
+				}
+			}
+		}
 		return in.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
+				layout.Flexed(1, material.Editor(m.Theme, m.searchEditor, "Search").Layout),
 				layout.Rigid(layout.Spacer{Height: unit.Dp(16)}.Layout),
 				layout.Flexed(0.5, func(gtx layout.Context) layout.Dimensions {
 					for m.addBtn.Clicked() {

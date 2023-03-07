@@ -48,5 +48,5 @@ const (
 	EntriesReceived = "entries_received"
 	SaveNewEntry    = "save_new_entry"
 	RemoveEntry     = "remove_entry"
-	CopyEntry       = "copy_entry"
+	FilterEntries   = "filter_entries"
 )
